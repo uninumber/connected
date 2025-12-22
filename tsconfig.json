@@ -1,0 +1,23 @@
+{
+    "compilerOptions": {
+        "target": "esnext",
+        "module": "esnext",
+        "moduleResolution": "node",
+        "strict": true,
+        "sourceMap": true,
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "esModuleInterop": true,
+        "lib": ["esnext", "dom", "dom.iterable"],
+        "skipLibCheck": true,
+        "noEmit": true,
+        "types": ["vite/client"],
+    },
+    "include": [
+        "resources/js/**/*.ts",
+        "resources/js/**/*.js",
+        "resources/js/**/*.svelte",
+        "resources/js/**/*.d.ts",
+    ],
+    "exclude": ["node_modules"],
+}
