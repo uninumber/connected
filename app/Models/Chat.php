@@ -37,7 +37,9 @@ class Chat extends Model
      */
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, "chat_user");
+        return $this->belongsToMany(User::class, "chat_user")->withPivot(
+            "unread",
+        );
     }
 
     public function messages(): HasMany

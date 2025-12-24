@@ -32,26 +32,24 @@
 
         fetchChatData();
 
-        // Subscribe to real-time updates for this specific chat
-        const channel = window.Echo.private(`chat.${chatId}`).listen(
-            "MessageSent",
+        window.Echo.private(`user.${user.id}.chats`).listen(
+            ".MessageSent",
             (e) => {
-                // Prevent duplicate messages if it's our own (already added optimistically)
-                if (e.message && !messages.find((m) => m.id === e.message.id)) {
+                const message = e.message;
+                if (
+                    message.chat_id === chatId &&
+                    !messages.find((m) => m.id === message.id)
+                ) {
                     messages = [
                         ...messages,
                         {
-                            ...e.message,
-                            is_me: e.message.user_id === user?.id,
+                            ...message,
+                            is_me: message.user_id === user?.id,
                         },
                     ];
                 }
             },
         );
-
-        return () => {
-            window.Echo.leave(`chat.${chatId}`);
-        };
     });
 
     async function fetchChatData() {
@@ -186,8 +184,8 @@
                     {/if}
                     <div
                         class="rounded-2xl px-4 py-2 {msg.is_me
-                            ? 'bg-blue-600 text-white rounded-tr-none shadow-md shadow-blue-100'
-                            : 'bg-white text-gray-800 shadow-sm border border-gray-100 rounded-tl-none'}"
+                            ? 'bg-blue-600 text-white rounded shadow-md shadow-blue-100'
+                            : 'bg-white text-gray-800 shadow-sm border border-gray-100 rounded'}"
                     >
                         <p class="text-sm leading-relaxed">{msg.text}</p>
                     </div>

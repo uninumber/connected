@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Chat;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,21 +19,55 @@ class ChatController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $chats = $user->chats()->with("users")->get();
+        $chats = Chat::query()
+            ->join("chat_user as cu", "chats.id", "=", "cu.chat_id")
+            ->where("cu.user_id", $user->id)
+            ->orderBy("chats.updated_at", "desc")
+            ->with("users")
+            ->select("chats.*", "cu.unread as my_unread")
+            ->get();
         return ListChats::collection($chats);
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            "userId" => "required|exists:users,id",
+            "user_id" => "required|exists:users,id",
         ]);
 
         $user = Auth::user();
-        $targetUser = User::findOrFail($request->userId);
+        if ($user === $request->user_id) {
+            return response()->json(
+                ["error" => "Cannot chat with yourself"],
+                400,
+            );
+        }
 
-        $chat = $user->chats()->create([
+        $targetUser = User::findOrFail($request->user_id);
+
+        $existingChat = $user
+            ->chats()
+            ->whereHas("users", function ($q) use ($targetUser) {
+                $q->where("users.id", $targetUser->id);
+            })
+            ->exists();
+
+        if ($existingChat) {
+            $chat = $user
+                ->chats()
+                ->whereHas("users", function ($q) use ($targetUser) {
+                    $q->where("users.id", $targetUser->id);
+                })
+                ->first();
+            return response()->json([
+                "message" => "Chat already exists",
+                "chat" => new ListChats($chat),
+            ]);
+        }
+
+        $chat = Chat::create([
             "last_message" => "Start chatting with " . $targetUser->nickname,
+            "id" => Str::uuid()->toString(),
         ]);
 
         DB::table("chat_user")->insert([
@@ -40,7 +75,13 @@ class ChatController extends Controller
             ["chat_id" => $chat->id, "user_id" => $targetUser->id],
         ]);
 
-        return response()->json($chat);
+        // Reload the chat with users to ensure the resource has everything it needs
+        $chat->load("users");
+
+        return response()->json([
+            "message" => "Have a fun chatting!",
+            "chat" => new ListChats($chat),
+        ]);
     }
 
     /**
@@ -53,6 +94,12 @@ class ChatController extends Controller
             ->chats()
             ->with(["users", "messages"])
             ->findOrFail($id);
+
+        DB::table("chat_user")
+            ->where("chat_id", $chat->id)
+            ->where("user_id", $user->id)
+            ->update(["unread" => 0]);
+
         return response()->json($chat);
     }
 
@@ -104,13 +151,28 @@ class ChatController extends Controller
         $text = $request->input("text");
 
         $chat = $user->chats()->findOrFail($chatId);
+
+        $otherUser = $chat
+            ->users()
+            ->whereNot("users.id", $user->id)
+            ->select("users.id", "users.nickname")
+            ->first();
+
         $message = $chat->messages()->create([
             "id" => Str::uuid()->toString(),
             "user_id" => $user->id,
             "text" => $text,
         ]);
 
-        broadcast(new MessageSent($message))->toOthers();
+        $chat->last_message = $user->nickname . ": " . $text;
+        $chat->save();
+
+        DB::table("chat_user")
+            ->where("chat_id", $chatId)
+            ->where("user_id", $otherUser->id)
+            ->increment("unread", 1);
+
+        broadcast(new MessageSent($message, $otherUser))->toOthers();
 
         $message->load("user");
 

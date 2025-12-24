@@ -3,6 +3,7 @@
 namespace App\Events;
 
 use App\Models\Message;
+use App\Models\User;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
@@ -14,31 +15,37 @@ class MessageSent implements ShouldBroadcast
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     /**
-     * The message instance.
+     * Create a new event instance.
      *
-     * @var \App\Models\Message
+     * We pass the Message and the recipient User directly to avoid
+     * any database queries during the broadcasting process.
      */
-    public $message;
+    public function __construct(
+        public Message $message,
+        protected User $recipient,
+    ) {
+        // Ensure the user relationship is loaded for the frontend display
+        if (!$this->message->relationLoaded("user")) {
+            $this->message->load("user");
+        }
+    }
 
     /**
-     * Create a new event instance.
+     * Get the data to broadcast.
      */
-    public function __construct(Message $message)
+    public function broadcastWith(): array
     {
-        $this->message = $message;
-
-        // Load the user relationship so the frontend knows who sent it
-        $this->message->load("user");
+        return [
+            "message" => $this->message,
+        ];
     }
 
     /**
      * Get the channels the event should broadcast on.
-     *
-     * @return array<int, \Illuminate\Broadcasting\Channel>
      */
     public function broadcastOn(): array
     {
-        return [new PrivateChannel("chat." . $this->message->chat_id)];
+        return [new PrivateChannel("user.{$this->recipient->id}.chats")];
     }
 
     /**

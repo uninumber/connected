@@ -13,6 +13,31 @@
 
     onMount(async () => {
         await fetchChats();
+
+        window.Echo.private(`user.${user.id}.chats`).listen(
+            ".MessageSent",
+            (e) => {
+                const message = e.message;
+                const chatIndex = chats.findIndex(
+                    (chat) => chat.id === message.chat_id,
+                );
+                if (chatIndex !== -1) {
+                    const updatedChat = {
+                        ...chats[chatIndex],
+                        last_message: `${message.user.nickname}: ${message.text}`,
+                        time: "Just now",
+                        unread:
+                            message.chat_id !== activeChatId
+                                ? (chats[chatIndex].unread || 0) + 1
+                                : chats[chatIndex].unread || 0,
+                    };
+
+                    const newChats = [...chats];
+                    newChats.splice(chatIndex, 1);
+                    chats = [updatedChat, ...newChats];
+                }
+            },
+        );
     });
 
     async function fetchChats() {
@@ -27,7 +52,6 @@
         }
     }
 
-    // Handle unified search
     $effect(() => {
         const query = searchQuery.trim();
         if (query.length > 0) {
@@ -55,12 +79,12 @@
 
     function selectChat(id) {
         activeChatId = id;
-        searchQuery = ""; // Clear search on selection
-        // Mark as read logic would go here
+        searchQuery = "";
+        activeChat = chats.find((c) => c.id === id);
+        activeChat.unread = 0;
     }
 
     async function startChatWithUser(targetUser) {
-        // Check if chat already exists
         const existingChat = chats.find((c) =>
             c.users?.some((u) => u.id === targetUser.id),
         );
@@ -70,7 +94,16 @@
             return;
         }
 
-        await axios.post(`/users/chats`, { userId: targetUser.id });
+        const response = await axios.post(`/users/chats`, {
+            user_id: targetUser.id,
+        });
+
+        const newChat = response.data.chat;
+
+        chats = [newChat, ...chats];
+
+        activeChatId = newChat.id;
+
         searchQuery = "";
     }
 </script>
@@ -249,7 +282,7 @@
                         <div
                             class="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-lg border-2 border-white shadow-sm"
                         >
-                            {chat.name?.charAt(0) || "C"}
+                            {chat.title?.charAt(0) || "C"}
                         </div>
                         <div class="flex-1 min-w-0">
                             <div
@@ -258,7 +291,13 @@
                                 <h3
                                     class="text-sm font-bold text-gray-800 truncate"
                                 >
-                                    {chat.name}
+                                    {chat.title}
+                                    {#if chat.unread > 0}
+                                        <span
+                                            class="ml-1 bg-red-400 text-white text-xs px-1 rounded-full"
+                                            >{chat.unread}</span
+                                        >
+                                    {/if}
                                 </h3>
                                 <span class="text-[10px] text-gray-400"
                                     >{chat.time || ""}</span
@@ -268,13 +307,6 @@
                                 <p class="text-xs text-gray-500 truncate">
                                     {chat.last_message || "No messages"}
                                 </p>
-                                {#if chat.unread > 0}
-                                    <span
-                                        class="h-5 w-5 bg-blue-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center"
-                                    >
-                                        {chat.unread}
-                                    </span>
-                                {/if}
                             </div>
                         </div>
                     </button>

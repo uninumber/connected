@@ -24,7 +24,8 @@ class ListChats extends JsonResource
 
         return [
             "id" => $this->id,
-            "name" => $otherUser ? $otherUser->nickname : "Unknown User",
+            "title" => $otherUser ? $otherUser->nickname : "Unknown User",
+            "unread" => $this->my_unread ?? 0,
             "last_message" => $this->last_message,
             "time" => $this->updated_at->diffForHumans(),
             "users" => $this->users->map(

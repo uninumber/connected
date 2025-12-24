@@ -35,6 +35,7 @@ window.Echo = new Echo({
     authorizer: (channel, options) => {
         return {
             authorize: (socketId, callback) => {
+                const token = localStorage.getItem("auth_token");
                 axios
                     .post("/broadcasting/auth", {
                         socket_id: socketId,
