@@ -53,7 +53,7 @@ class DatabaseSeeder extends Seeder
             "last_message" => $faker->sentence(),
         ]);
 
-        DB::table("chat_users")->insert([
+        DB::table("chat_user")->insert([
             ["chat_id" => $chat->id, "user_id" => $michaela->id],
             ["chat_id" => $chat->id, "user_id" => $robert->id],
             ["chat_id" => $secondChat->id, "user_id" => $michaela->id],

@@ -28,7 +28,8 @@ Route::middleware("auth:sanctum")->group(function () {
     Route::get("/search", [ChatController::class, "search"]);
 
     // Chats
-    Route::get("/users/{id}/chats", [ChatController::class, "index"]);
+    Route::get("/users/chats", [ChatController::class, "index"]);
+    Route::post("/users/chats", [ChatController::class, "store"]);
     Route::get("/chats/{chat}", [ChatController::class, "show"]);
 
     // Messages

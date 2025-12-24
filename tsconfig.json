@@ -11,6 +11,7 @@
         "lib": ["esnext", "dom", "dom.iterable"],
         "skipLibCheck": true,
         "noEmit": true,
+        "allowJs": true,
         "types": ["vite/client"],
     },
     "include": [

@@ -12,7 +12,7 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create("chat_users", function (Blueprint $table) {
+        Schema::create("chat_user", function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Chat::class)->constrained()->cascadeOnDelete();
@@ -27,6 +27,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists("chat_users");
+        Schema::dropIfExists("chat_user");
     }
 };

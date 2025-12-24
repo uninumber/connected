@@ -17,7 +17,7 @@
 
     async function fetchChats() {
         try {
-            const response = await axios.get(`/users/${user.id}/chats`);
+            const response = await axios.get(`/users/chats`);
             chats = response.data;
             if (chats.length > 0 && !activeChatId) {
                 activeChatId = chats[0].id;
@@ -70,8 +70,7 @@
             return;
         }
 
-        // Logic to create a new chat would go here
-        console.log("Starting new chat with:", targetUser.nickname);
+        await axios.post(`/users/chats`, { userId: targetUser.id });
         searchQuery = "";
     }
 </script>
@@ -248,7 +247,7 @@
                             : 'border-l-4 border-l-transparent'}"
                     >
                         <div
-                            class="h-12 w-12 rounded-full flex-shrink-0 bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-lg border-2 border-white shadow-sm"
+                            class="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-lg border-2 border-white shadow-sm"
                         >
                             {chat.name?.charAt(0) || "C"}
                         </div>

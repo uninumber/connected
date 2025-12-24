@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Chat;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\ListChats;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Events\MessageSent;
 
@@ -20,6 +20,27 @@ class ChatController extends Controller
         $user = Auth::user();
         $chats = $user->chats()->with("users")->get();
         return ListChats::collection($chats);
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            "userId" => "required|exists:users,id",
+        ]);
+
+        $user = Auth::user();
+        $targetUser = User::findOrFail($request->userId);
+
+        $chat = $user->chats()->create([
+            "last_message" => "Start chatting with " . $targetUser->nickname,
+        ]);
+
+        DB::table("chat_user")->insert([
+            ["chat_id" => $chat->id, "user_id" => $user->id],
+            ["chat_id" => $chat->id, "user_id" => $targetUser->id],
+        ]);
+
+        return response()->json($chat);
     }
 
     /**
