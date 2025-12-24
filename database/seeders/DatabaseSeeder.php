@@ -7,7 +7,6 @@ use App\Models\Chat;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Faker\Factory as Faker;
-use App\Enums\ChatTypeEnum;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
@@ -22,25 +21,43 @@ class DatabaseSeeder extends Seeder
     {
         $faker = Faker::create();
 
-        $user = User::factory()->create([
-            "nickname" => "Mink",
+        for ($i = 0; $i < 10; $i++) {
+            $user = User::factory()->create([
+                "nickname" => fake()->name(),
+                "password" => Hash::make("Pass123!"),
+            ]);
+        }
+
+        $robert = User::factory()->create([
+            "nickname" => "Robert",
             "password" => Hash::make("Pass123!"),
         ]);
 
-        $anotherUser = User::factory()->create([
+        $michaela = User::factory()->create([
+            "nickname" => "Michaela",
+            "password" => Hash::make("Pass123!"),
+        ]);
+
+        $richard = User::factory()->create([
             "nickname" => "Richard",
             "password" => Hash::make("Pass123!"),
         ]);
 
         $chat = Chat::factory()->create([
             "id" => $faker->uuid(),
-            "type" => $faker->randomElement(ChatTypeEnum::cases()),
+            "last_message" => $faker->sentence(),
+        ]);
+
+        $secondChat = Chat::factory()->create([
+            "id" => $faker->uuid(),
             "last_message" => $faker->sentence(),
         ]);
 
         DB::table("chat_users")->insert([
-            ["chat_id" => $chat->id, "user_id" => $user->id],
-            ["chat_id" => $chat->id, "user_id" => $anotherUser->id],
+            ["chat_id" => $chat->id, "user_id" => $michaela->id],
+            ["chat_id" => $chat->id, "user_id" => $robert->id],
+            ["chat_id" => $secondChat->id, "user_id" => $michaela->id],
+            ["chat_id" => $secondChat->id, "user_id" => $richard->id],
         ]);
     }
 }
