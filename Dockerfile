@@ -6,6 +6,9 @@ RUN npm install
 COPY . .
 RUN npm run build
 
+# Expose Vite's default port
+EXPOSE 5173
+
 # Stage 2: PHP Application Environment
 FROM php:8.4-fpm-alpine
 
@@ -50,4 +53,4 @@ EXPOSE 9000
 
 # Use the entrypoint script to run migrations and start the server
 ENTRYPOINT ["entrypoint.sh"]
-CMD ["php-fpm"]
+CMD ["sh", "-c", "npm run dev & php-fpm"]
