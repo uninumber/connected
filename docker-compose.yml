@@ -6,7 +6,7 @@ services:
       args:
         VITE_REVERB_APP_KEY: "${REVERB_APP_KEY:-connectedkey}"
         VITE_REVERB_HOST: "${VITE_REVERB_HOST:-localhost}"
-        VITE_REVERB_PORT: "${VITE_PORT:-8080}"
+        VITE_REVERB_PORT: "${REVERB_PORT:-8080}"
         VITE_REVERB_SCHEME: "${REVERB_SCHEME:-http}"
     container_name: connected_app
     restart: unless-stopped
@@ -44,10 +44,14 @@ services:
       db:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "nc", "-z", "localhost", "9000"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
+      test:
+        [
+          "CMD-SHELL",
+          "nc -z localhost 9000 && [ -f /var/www/public/index.php ] && [ -f /var/www/public/build/manifest.json ]",
+        ]
+      interval: 2s
+      timeout: 5s
+      retries: 15
     networks:
       - connected-network
 
@@ -69,9 +73,9 @@ services:
           "CMD-SHELL",
           "pg_isready -U ${DB_USERNAME:-laravel} -d ${DB_DATABASE:-laravel}",
         ]
-      interval: 5s
+      interval: 2s
       timeout: 5s
-      retries: 5
+      retries: 10
     networks:
       - connected-network
 
@@ -97,7 +101,7 @@ services:
       args:
         VITE_REVERB_APP_KEY: "${REVERB_APP_KEY:-connectedkey}"
         VITE_REVERB_HOST: "${VITE_REVERB_HOST:-localhost}"
-        VITE_REVERB_PORT: "${VITE_PORT:-8080}"
+        VITE_REVERB_PORT: "${REVERB_PORT:-8080}"
         VITE_REVERB_SCHEME: "${REVERB_SCHEME:-http}"
     container_name: connected_reverb
     command: php artisan reverb:start --host=0.0.0.0 --port=8080 --debug
@@ -134,7 +138,7 @@ services:
       args:
         VITE_REVERB_APP_KEY: "${REVERB_APP_KEY:-connectedkey}"
         VITE_REVERB_HOST: "${VITE_REVERB_HOST:-localhost}"
-        VITE_REVERB_PORT: "${VITE_PORT:-8080}"
+        VITE_REVERB_PORT: "${REVERB_PORT:-8080}"
         VITE_REVERB_SCHEME: "${REVERB_SCHEME:-http}"
     container_name: connected_queue_worker
     command: php artisan queue:work --tries=3
