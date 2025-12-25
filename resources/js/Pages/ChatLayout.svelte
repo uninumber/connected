@@ -208,13 +208,13 @@
                                 <div
                                     class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold"
                                 >
-                                    {chat.name?.charAt(0) || "C"}
+                                    {chat.title?.charAt(0) || "C"}
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <h4
                                         class="text-sm font-bold text-gray-800 truncate"
                                     >
-                                        {chat.name}
+                                        {chat.title}
                                     </h4>
                                     <p class="text-xs text-gray-500 truncate">
                                         {chat.last_message || "No messages"}
@@ -236,9 +236,10 @@
                                 class="w-full flex items-center gap-3 p-3 hover:bg-gray-50 rounded-xl transition-colors text-left"
                             >
                                 <div
-                                    class="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-bold"
+                                    class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-gray-600 font-bold"
                                 >
-                                    {item.nickname}
+                                    {item.nickname?.charAt(0).toUpperCase() ||
+                                        "U"}
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <h4
