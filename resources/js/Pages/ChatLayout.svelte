@@ -238,7 +238,7 @@
                                 <div
                                     class="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-bold"
                                 >
-                                    {item.nickname.charAt(0).toUpperCase()}
+                                    {item.nickname}
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <h4

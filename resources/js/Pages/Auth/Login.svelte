@@ -48,7 +48,7 @@
     <div class="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden">
         <div class="p-8">
             <div class="text-center mb-10">
-                <h1 class="text-3xl font-bold text-gray-800">Welcome Back</h1>
+                <h1 class="text-3xl font-bold text-gray-800">Connected</h1>
                 <p class="text-gray-500 mt-2">
                     Enter your details to access your account
                 </p>
