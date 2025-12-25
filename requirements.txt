@@ -1,0 +1,31 @@
+# ==========================================
+# PHP Dependencies (Composer)
+# ==========================================
+Composer загружает все необходимые пакеты при инициализации проекта используя php фреймворк Laravel.
+Перечисление всех пакетов можно посмотреть используя команду `composer show`. (они добавляется автоматически (так называются 'батереи'))
+
+laravel/reverb                  ^1.6
+
+# ==========================================
+# Node.js Dependencies (NPM)
+# ==========================================
+
+# Frontend Framework & Build Tools
+svelte                          ^5.46.0   # Frontend component framework
+vite                            ^7.0.7    # Build tool and dev server
+laravel-vite-plugin             ^2.0.0    # Laravel integration for Vite
+@sveltejs/vite-plugin-svelte    ^6.2.1    # Svelte integration for Vite
+
+# Styling
+tailwindcss                     ^4.0.0    # Utility-first CSS framework
+@tailwindcss/vite               ^4.0.0    # Tailwind integration for Vite
+
+# Real-Time & Networking
+axios                           ^1.11.0   # HTTP client
+laravel-echo                    ^2.2.6    # WebSocket event listener
+pusher-js                       ^8.4.0    # WebSocket client (used with Reverb)
+
+# Utilities
+concurrently                    ^9.0.1    # Runs commands in parallel (dev only)
+
+Зависимости также перечислены в файле `package.json` и `composer.json`.
