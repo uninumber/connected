@@ -3,6 +3,19 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
+
+# Define build arguments for Vite
+ARG VITE_REVERB_APP_KEY
+ARG VITE_REVERB_HOST
+ARG VITE_REVERB_PORT
+ARG VITE_REVERB_SCHEME
+
+# Set them as environment variables for the build process
+ENV VITE_REVERB_APP_KEY=$VITE_REVERB_APP_KEY
+ENV VITE_REVERB_HOST=$VITE_REVERB_HOST
+ENV VITE_REVERB_PORT=$VITE_REVERB_PORT
+ENV VITE_REVERB_SCHEME=$VITE_REVERB_SCHEME
+
 RUN npm run build
 
 FROM php:8.4-fpm-alpine
@@ -19,9 +32,7 @@ RUN apk add --no-cache \
     curl \
     oniguruma-dev \
     libxml2-dev \
-    netcat-openbsd \
-    nodejs \
-    npm
+    netcat-openbsd
 
 # Install PHP extensions
 RUN docker-php-ext-install pdo pdo_pgsql pgsql mbstring zip exif pcntl bcmath gd
@@ -40,6 +51,11 @@ RUN composer install --optimize-autoloader
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+
+# Create a backup of vendor and build assets to handle volume mounts
+RUN mkdir -p /usr/src/app/public
+RUN cp -ar vendor /usr/src/app/
+RUN cp -ar public/build /usr/src/app/public/
 
 # Prepare entrypoint script (run migrations, prepare data, etc..)
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
